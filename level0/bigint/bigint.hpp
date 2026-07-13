@@ -1,57 +1,42 @@
-#ifndef BIGINT
-#define BIGINT
+#ifndef BIGINT_HPP
+#define BIGINT_HPP
 
-#include <sstream>
-#include <iostream>
 #include <string>
-#include <cstdlib>
+#include <iostream>
 
 class bigint
 {
 	private:
 		std::string str;
-		//std::string result;
 	public:
 		bigint();
 		bigint(unsigned int num);
-		bigint(const bigint& source);
+		bigint(const bigint& src);
+		bigint& operator=(const bigint& src);
 
-		std::string getStr()const;
+		bigint operator+(const bigint& o) const;
+		bigint& operator+=(const bigint& o);
+		bigint& operator++();
+		bigint operator++(int);
 
-		bigint& operator=(const bigint& source);
-
-		// addition
-		bigint operator+(const bigint& other)const;
-		bigint& operator+=(const bigint& other);
-
-		// increments
-		bigint& operator++(); // ++x
-		bigint operator++(int); // x++
-
-		// shift with num
-		bigint operator<<(unsigned int n)const;
-		bigint operator>>(unsigned int n)const;
+		bigint operator<<(unsigned int n) const;
+		bigint operator>>(unsigned int n) const;
 		bigint& operator<<=(unsigned int n);
 		bigint& operator>>=(unsigned int n);
 
-		//shift with object
-		bigint operator<<(const bigint& other)const;
-		bigint operator>>(const bigint& other)const;
-		bigint& operator<<=(const bigint& other);
-		bigint& operator>>=(const bigint& other);
+		bigint operator<<(const bigint& o) const;
+		bigint operator>>(const bigint& o) const;
+		bigint& operator<<=(const bigint& o);
+		bigint& operator>>=(const bigint& o);
 
-		// ==, !=, <, >, <=, >=
-		bool operator==(const bigint& other) const;
-		bool operator!=(const bigint& other) const;
-		bool operator<(const bigint& other) const;
-		bool operator>(const bigint& other) const;
-		bool operator<=(const bigint& other) const;
-		bool operator>=(const bigint& other) const;
+		bool operator==(const bigint& o) const;
+		bool operator<(const bigint& o) const;
+		bool operator!=(const bigint& o) const;
+		bool operator>(const bigint& o) const;
+		bool operator<=(const bigint& o) const;
+		bool operator>=(const bigint& o) const;
 
-		// ~bigint();
-
+		friend std::ostream& operator<<(std::ostream& os, const bigint& b);
 };
-
-std::ostream& operator<<(std::ostream& output, const bigint& obj);
 
 #endif

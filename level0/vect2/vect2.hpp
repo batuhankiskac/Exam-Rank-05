@@ -10,40 +10,32 @@ class vect2
 		int y;
 	public:
 		vect2();
-		vect2(int num1, int num2);
-		vect2(const vect2& source);
-		vect2& operator=(const vect2& source);
+		vect2(int nx, int ny);
+		vect2(const vect2& src);
+		vect2& operator=(const vect2& src);
 
-		int operator[](int index) const;
-		int& operator[](int index); // NON-COST
+		int operator[](int i) const;
+		int& operator[](int i);
 
 		vect2 operator-() const;
-		vect2 operator*(int num) const;
+		vect2 operator*(int n) const;
+		vect2& operator*=(int n);
 
-		vect2& operator*=(int num);
-
-		vect2& operator+=(const vect2& obj);
-		vect2& operator-=(const vect2& obj);
-		vect2& operator*=(const vect2& obj);
-
-		vect2 operator+(const vect2& obj) const;
-		vect2 operator-(const vect2& obj) const;
-		vect2 operator*(const vect2& obj) const;
+		vect2& operator+=(const vect2& o);
+		vect2& operator-=(const vect2& o);
+		vect2 operator+(const vect2& o) const;
+		vect2 operator-(const vect2& o) const;
 
 		vect2& operator++();
 		vect2 operator++(int);
 		vect2& operator--();
 		vect2 operator--(int);
 
-		bool operator==(const vect2& obj) const;
-		bool operator!=(const vect2& obj) const;
-
-		~vect2();
+		bool operator==(const vect2& o) const;
+		bool operator!=(const vect2& o) const;
 };
 
-vect2 operator*(int num, const vect2& obj);
-
-std::ostream& operator<<(std::ostream& os,const vect2& obj);
+vect2 operator*(int n, const vect2& o);
+std::ostream& operator<<(std::ostream& os, const vect2& o);
 
 #endif
-
