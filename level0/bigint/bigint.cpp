@@ -5,9 +5,15 @@
 bigint::bigint() : str("0") {}
 bigint::bigint(unsigned int num)
 {
-	if (num == 0) { str = "0"; return; }
+	if (num == 0) {
+		str = "0";
+		return;
+	}
 	std::string tmp;
-	while (num) { tmp.push_back((num % 10) + '0'); num /= 10; }
+	while (num) {
+		tmp.push_back((num % 10) + '0');
+		num /= 10;
+	}
 	str.assign(tmp.rbegin(), tmp.rend());
 }
 bigint::bigint(const bigint& src) : str(src.str) {}
@@ -44,7 +50,11 @@ bigint bigint::operator+(const bigint& o) const
 
 bigint& bigint::operator+=(const bigint& o) { return *this = *this + o; }
 bigint& bigint::operator++() { return *this = *this + bigint(1); }
-bigint bigint::operator++(int) { bigint tmp = *this; ++(*this); return tmp; }
+bigint bigint::operator++(int) {
+	bigint tmp = *this;
+	++(*this);
+	return tmp;
+}
 
 bigint bigint::operator<<(unsigned int n) const
 {

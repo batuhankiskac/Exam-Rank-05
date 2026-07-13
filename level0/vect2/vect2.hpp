@@ -3,36 +3,30 @@
 
 #include <iostream>
 
-class vect2
-{
-	private:
-		int x;
-		int y;
-	public:
-		vect2();
-		vect2(int nx, int ny);
-		vect2(const vect2& src);
-		vect2& operator=(const vect2& src);
-
-		int operator[](int i) const;
-		int& operator[](int i);
-
-		vect2 operator-() const;
-		vect2 operator*(int n) const;
-		vect2& operator*=(int n);
-
-		vect2& operator+=(const vect2& o);
-		vect2& operator-=(const vect2& o);
-		vect2 operator+(const vect2& o) const;
-		vect2 operator-(const vect2& o) const;
-
-		vect2& operator++();
-		vect2 operator++(int);
-		vect2& operator--();
-		vect2 operator--(int);
-
-		bool operator==(const vect2& o) const;
-		bool operator!=(const vect2& o) const;
+class vect2 {
+private:
+	int x;
+	int y;
+public:
+	vect2();
+	vect2(int nx, int ny);
+	vect2(const vect2& src);
+	vect2& operator=(const vect2& src);
+	int operator[](int i) const;
+	int& operator[](int i);
+	vect2 operator-() const;
+	vect2 operator*(int n) const;
+	vect2& operator*=(int n);
+	vect2& operator+=(const vect2& o);
+	vect2& operator-=(const vect2& o);
+	vect2 operator+(const vect2& o) const;
+	vect2 operator-(const vect2& o) const;
+	vect2& operator++();
+	vect2 operator++(int);
+	vect2& operator--();
+	vect2 operator--(int);
+	bool operator==(const vect2& o) const;
+	bool operator!=(const vect2& o) const;
 };
 
 vect2 operator*(int n, const vect2& o);
