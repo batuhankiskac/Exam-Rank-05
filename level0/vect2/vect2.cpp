@@ -31,9 +31,7 @@ vect2& vect2::operator+=(const vect2& o) {
 }
 
 vect2& vect2::operator-=(const vect2& o) {
-	x -= o.x;
-	y -= o.y;
-	return *this;
+	return *this += -o;
 }
 
 vect2 vect2::operator*(int n) const {
@@ -41,11 +39,13 @@ vect2 vect2::operator*(int n) const {
 }
 
 vect2 vect2::operator+(const vect2& o) const {
-	return vect2(x + o.x, y + o.y);
+	vect2 tmp(*this);
+	return tmp += o;
 }
 
 vect2 vect2::operator-(const vect2& o) const {
-	return vect2(x - o.x, y - o.y);
+	vect2 tmp(*this);
+	return tmp -= o;
 }
 
 vect2& vect2::operator++() {
@@ -55,23 +55,19 @@ vect2& vect2::operator++() {
 }
 
 vect2 vect2::operator++(int) {
-	vect2 temp(*this);
-	++x;
-	++y;
-	return temp;
+	vect2 tmp(*this);
+	++(*this);
+	return tmp;
 }
 
 vect2& vect2::operator--() {
-	--x;
-	--y;
-	return *this;
+	return *this += vect2(-1, -1);
 }
 
 vect2 vect2::operator--(int) {
-	vect2 temp(*this);
-	--x;
-	--y;
-	return temp;
+	vect2 tmp(*this);
+	--(*this);
+	return tmp;
 }
 
 bool vect2::operator==(const vect2& o) const {
