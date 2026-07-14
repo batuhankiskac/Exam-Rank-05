@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-typedef struct s_game
-{
+typedef struct s_game {
 	int width;
 	int height;
 	int iterations;
