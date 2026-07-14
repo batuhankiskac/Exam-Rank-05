@@ -9,7 +9,7 @@ int init_game(t_game *g, char *argv[])
 	g->i = 0;
 	g->j = 0;
 	g->draw = 0;
-	g->board = malloc(g->height * sizeof(char *));
+	g->board = calloc(g->height, sizeof(char *));
 	if (!g->board) return -1;
 	for (int i = 0; i < g->height; i++)
 	{

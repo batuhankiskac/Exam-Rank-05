@@ -59,7 +59,8 @@ bigint bigint::operator++(int) {
 
 bigint bigint::operator<<(unsigned int n) const {
 	bigint t = *this;
-	t.str.append(n, '0');
+	if (t.str != "0")
+		t.str.append(n, '0');
 	return t;
 }
 
