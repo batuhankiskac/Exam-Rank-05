@@ -1,5 +1,24 @@
-#include "life.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+typedef struct s_game {
+	int width;
+	int height;
+	int iterations;
+	int i;
+	int j;
+	int draw;
+	char **board;
+} t_game;
+
+void free_board(t_game *g) {
+	if (g->board) {
+		for (int i = 0; i < g->height; i++)
+			free(g->board[i]);
+		free(g->board);
+	}
+}
 
 int init_game(t_game *g, char *argv[]) {
 	g->width = atoi(argv[1]);
@@ -100,14 +119,6 @@ void print_board(t_game *g) {
 		for (int j = 0; j < g->width; j++)
 			putchar(g->board[i][j]);
 		putchar('\n');
-	}
-}
-
-void free_board(t_game *g) {
-	if (g->board) {
-		for (int i = 0; i < g->height; i++)
-			free(g->board[i]);
-		free(g->board);
 	}
 }
 

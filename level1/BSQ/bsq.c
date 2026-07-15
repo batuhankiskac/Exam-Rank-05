@@ -1,4 +1,24 @@
-#include "bsq.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct s_elements {
+	int n_lines;
+	char empty;
+	char obstacle;
+	char full;
+} t_elements;
+
+typedef struct s_map {
+	char **grid;
+	int width;
+	int height;
+} t_map;
+
+typedef struct s_square {
+	int size;
+	int i;
+	int j;
+} t_square;
 
 static void free_map(char **arr) {
 	if (!arr)
@@ -11,7 +31,6 @@ static void free_map(char **arr) {
 static int load_elements(FILE *file, t_elements *e) {
 	if (fscanf(file, "%d %c %c %c", &e->n_lines, &e->empty, &e->obstacle, &e->full) != 4)
 		return -1;
-
 	if (e->n_lines <= 0)
 		return -1;
 	if (e->empty == e->obstacle || e->empty == e->full || e->obstacle == e->full)
@@ -22,16 +41,6 @@ static int load_elements(FILE *file, t_elements *e) {
 		return -1;
 	if (e->full < 32 || e->full > 126)
 		return -1;
-	return 0;
-}
-
-static int valid_chars(char **grid, char empty, char obstacle) {
-	for (int i = 0; grid[i]; i++) {
-		for (int j = 0; grid[i][j]; j++) {
-			if (grid[i][j] != empty && grid[i][j] != obstacle)
-				return -1;
-		}
-	}
 	return 0;
 }
 
@@ -56,7 +65,6 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 			free_map(map->grid);
 			return -1;
 		}
-
 		r--;
 
 		if (i == 0)
@@ -73,34 +81,37 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 			free_map(map->grid);
 			return -1;
 		}
-		for (int k = 0; k < r; k++) map->grid[i][k] = line[k];
+		int k;
+		for (k = 0; k < r; k++) {
+			if (line[k] != e->empty && line[k] != e->obstacle)
+				break;
+			map->grid[i][k] = line[k];
+		}
+		if (k < r) {
+			map->grid[i][k] = '\0';
+			free(line);
+			free_map(map->grid);
+			return -1;
+		}
 		map->grid[i][r] = '\0';
 	}
 	free(line);
-
-	if (valid_chars(map->grid, e->empty, e->obstacle) == -1) {
-		free_map(map->grid);
-		return -1;
-	}
 	return 0;
 }
 
 static void find_square(t_map *map, t_square *sq, t_elements *e) {
 	int m[map->height][map->width];
 	for (int i = 0; i < map->height; i++)
-		for (int j = 0; j < map->width; j++)
-		{
+		for (int j = 0; j < map->width; j++) {
 			if (map->grid[i][j] == e->obstacle) m[i][j] = 0;
 			else if (i == 0 || j == 0) m[i][j] = 1;
-			else
-			{
+			else {
 				int min = m[i-1][j];
 				if (m[i-1][j-1] < min) min = m[i-1][j-1];
 				if (m[i][j-1] < min) min = m[i][j-1];
 				m[i][j] = min + 1;
 			}
-			if (m[i][j] > sq->size)
-			{
+			if (m[i][j] > sq->size) {
 				sq->size = m[i][j];
 				sq->i = i - m[i][j] + 1;
 				sq->j = j - m[i][j] + 1;
@@ -134,11 +145,20 @@ int execute_bsq(FILE *file) {
 	return 0;
 }
 
-int convert_file_pointer(char *name) {
-	FILE *file = fopen(name, "r");
-	if (!file)
-		return -1;
-	int ret = execute_bsq(file);
-	fclose(file);
-	return ret;
+int main(int argc, char *argv[]) {
+	if (argc == 1) {
+		if (execute_bsq(stdin) == -1)
+			fprintf(stderr, "map error\n");
+	} else {
+		for (int i = 1; i < argc; i++) {
+			FILE *file = fopen(argv[i], "r");
+			if (!file || execute_bsq(file) == -1)
+				fprintf(stderr, "map error\n");
+			if (file)
+				fclose(file);
+			if (i < argc - 1)
+				fprintf(stdout, "\n");
+		}
+	}
+	return 0;
 }
