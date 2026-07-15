@@ -83,11 +83,11 @@ bigint& bigint::operator>>=(unsigned int n) {
 }
 
 bigint bigint::operator<<(const bigint& o) const {
-	return *this << (unsigned)atoi(o.str.c_str());
+	return *this << (unsigned)strtoul(o.str.c_str(), NULL, 10);
 }
 
 bigint bigint::operator>>(const bigint& o) const {
-	return *this >> (unsigned)atoi(o.str.c_str());
+	return *this >> (unsigned)strtoul(o.str.c_str(), NULL, 10);
 }
 
 bigint& bigint::operator<<=(const bigint& o) {

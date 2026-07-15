@@ -35,12 +35,6 @@ static int load_elements(FILE *file, t_elements *e) {
 		return -1;
 	if (e->empty == e->obstacle || e->empty == e->full || e->obstacle == e->full)
 		return -1;
-	if (e->empty < 32 || e->empty > 126)
-		return -1;
-	if (e->obstacle < 32 || e->obstacle > 126)
-		return -1;
-	if (e->full < 32 || e->full > 126)
-		return -1;
 	return 0;
 }
 
@@ -100,23 +94,27 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 }
 
 static void find_square(t_map *map, t_square *sq, t_elements *e) {
-	int m[map->height][map->width];
+	int w = map->width;
+	int *m = calloc(map->height * w, sizeof(int));
+	if (!m)
+		return;
 	for (int i = 0; i < map->height; i++)
-		for (int j = 0; j < map->width; j++) {
-			if (map->grid[i][j] == e->obstacle) m[i][j] = 0;
-			else if (i == 0 || j == 0) m[i][j] = 1;
+		for (int j = 0; j < w; j++) {
+			if (map->grid[i][j] == e->obstacle) m[i*w+j] = 0;
+			else if (i == 0 || j == 0) m[i*w+j] = 1;
 			else {
-				int min = m[i-1][j];
-				if (m[i-1][j-1] < min) min = m[i-1][j-1];
-				if (m[i][j-1] < min) min = m[i][j-1];
-				m[i][j] = min + 1;
+				int min = m[(i-1)*w+j];
+				if (m[(i-1)*w+(j-1)] < min) min = m[(i-1)*w+(j-1)];
+				if (m[i*w+(j-1)] < min) min = m[i*w+(j-1)];
+				m[i*w+j] = min + 1;
 			}
-			if (m[i][j] > sq->size) {
-				sq->size = m[i][j];
-				sq->i = i - m[i][j] + 1;
-				sq->j = j - m[i][j] + 1;
+			if (m[i*w+j] > sq->size) {
+				sq->size = m[i*w+j];
+				sq->i = i - m[i*w+j] + 1;
+				sq->j = j - m[i*w+j] + 1;
 			}
 		}
+	free(m);
 }
 
 static void print_map(t_map *map, t_square *sq, t_elements *e) {
