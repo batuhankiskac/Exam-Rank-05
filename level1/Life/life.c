@@ -2,139 +2,90 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-typedef struct s_game {
-	int width;
-	int height;
-	int iterations;
-	int i;
-	int j;
-	int draw;
-	char **board;
-} t_game;
-
-void free_board(t_game *g) {
-	if (g->board) {
-		for (int i = 0; i < g->height; i++)
-			free(g->board[i]);
-		free(g->board);
-	}
-}
-
-int init_game(t_game *g, char *argv[]) {
-	g->width = atoi(argv[1]);
-	g->height = atoi(argv[2]);
-	g->iterations = atoi(argv[3]);
-	g->i = 0;
-	g->j = 0;
-	g->draw = 0;
-	g->board = calloc(g->height, sizeof(char *));
-
-	if (!g->board)
-		return -1;
-	for (int i = 0; i < g->height; i++) {
-		g->board[i] = malloc(g->width);
-		if (!g->board[i]) {
-			free_board(g);
-			return -1;
+int count_neighbors(char *board, int row, int col, int width, int height) {
+	int count = 0;
+	for (int row_offset = -1; row_offset <= 1; row_offset++) {
+		for (int col_offset = -1; col_offset <= 1; col_offset++) {
+			if (row_offset == 0 && col_offset == 0)
+				continue;
+			int neighbor_row = row + row_offset;
+			int neighbor_col = col + col_offset;
+			if (neighbor_row >= 0 && neighbor_row < height && neighbor_col >= 0 && neighbor_col < width) {
+				if (board[neighbor_row * width + neighbor_col] == 'O')
+					count++;
+			}
 		}
-		for (int j = 0; j < g->width; j++)
-			g->board[i][j] = ' ';
 	}
-	return 0;
+	return count;
 }
 
-void fill_board(t_game *g) {
-	char c;
-	while (read(STDIN_FILENO, &c, 1) == 1) {
+int main(int argc, char **argv) {
+	if (argc != 4)
+		return 1;
+
+	int width = atoi(argv[1]);
+	int height = atoi(argv[2]);
+	int iter = atoi(argv[3]);
+	int size = width * height;
+
+	char *board = malloc(size);
+	char *next = malloc(size);
+	if (!board || !next)
+		return 1;
+
+	for (int i = 0; i < size; i++)
+		board[i] = ' ';
+
+	int row = 0, col = 0, draw = 0;
+	char cmd;
+
+	while (read(STDIN_FILENO, &cmd, 1) == 1) {
 		int moved = 1;
-		if (c == 'w') {
-			if (g->i > 0)
-				g->i--;
-		} else if (c == 's') {
-			if (g->i < g->height - 1)
-			g->i++;
-		} else if (c == 'a') {
-			if (g->j > 0)
-				g->j--;
-		} else if (c == 'd') {
-			if (g->j < g->width - 1)
-				g->j++;
-		} else if (c == 'x') {
-			g->draw = !g->draw;
+		if (cmd == 'w') {
+			if (row > 0)
+				row--;
+		} else if (cmd == 's') {
+			if (row < height - 1)
+				row++;
+		} else if (cmd == 'a') {
+			if (col > 0)
+				col--;
+		} else if (cmd == 'd') {
+			if (col < width - 1)
+				col++;
+		} else if (cmd == 'x') {
+			draw = !draw;
 		} else {
 			moved = 0;
 		}
 
-		if (g->draw && moved)
-			if (g->i >= 0 && g->i < g->height && g->j >= 0 && g->j < g->width)
-				g->board[g->i][g->j] = 'O';
+		if (draw && moved)
+			board[row * width + col] = 'O';
 	}
-}
 
-static int count_neighbors(t_game *g, int i, int j) {
-	int n = 0;
-	for (int di = -1; di <= 1; di++)
-		for (int dj = -1; dj <= 1; dj++) {
-			if (di == 0 && dj == 0)
-				continue;
-
-			int ni = i + di, nj = j + dj;
-			if (ni >= 0 && nj >= 0 && ni < g->height && nj < g->width)
-				if (g->board[ni][nj] == 'O')
-					n++;
-		}
-	return n;
-}
-
-int play(t_game *g) {
-	char **tmp = malloc(g->height * sizeof(char *));
-
-	if (!tmp)
-		return -1;
-	for (int i = 0; i < g->height; i++) {
-		tmp[i] = malloc(g->width);
-		if (!tmp[i]) {
-			for (int k = 0; k < i; k++) {
-				free(tmp[k]);
-				free(tmp);
-				return -1;
+	for (int iteration = 0; iteration < iter; iteration++) {
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				int neighbors = count_neighbors(board, y, x, width, height);
+				int idx = y * width + x;
+				if (board[idx] == 'O') {
+					next[idx] = (neighbors == 2 || neighbors == 3) ? 'O' : ' ';
+				} else {
+					next[idx] = (neighbors == 3) ? 'O' : ' ';
+				}
 			}
 		}
-
-		for (int j = 0; j < g->width; j++) {
-			int n = count_neighbors(g, i, j);
-			if (g->board[i][j] == 'O')
-				tmp[i][j] = (n == 2 || n == 3) ? 'O' : ' ';
-			else
-				tmp[i][j] = (n == 3) ? 'O' : ' ';
-		}
+		char *temp = board;
+		board = next;
+		next = temp;
 	}
-	free_board(g);
-	g->board = tmp;
-	return 0;
-}
 
-void print_board(t_game *g) {
-	for (int i = 0; i < g->height; i++) {
-		for (int j = 0; j < g->width; j++)
-			putchar(g->board[i][j]);
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++)
+			putchar(board[y * width + x]);
 		putchar('\n');
-	}
-}
 
-int main(int argc, char *argv[]) {
-	if (argc != 4)
-		return 1;
-	t_game g;
-	if (init_game(&g, argv) == -1)
-		return 1;
-	fill_board(&g);
-	for (int i = 0; i < g.iterations; i++)
-		if (play(&g) == -1) {
-			free_board(&g);
-			return 1;
-		}
-	print_board(&g);
-	free_board(&g);
+	free(board);
+	free(next);
 	return 0;
 }
