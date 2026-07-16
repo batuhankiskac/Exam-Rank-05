@@ -3,14 +3,19 @@
 #include <unistd.h>
 
 int count_neighbors(char *board, int row, int col, int width, int height) {
-	static const int d[] = {-1,-1, -1,0, -1,1, 0,-1, 0,1, 1,-1, 1,0, 1,1};
 	int count = 0;
-	for (int i = 0; i < 16; i += 2) {
-		int neighbor_row = row + d[i];
-		int neighbor_col = col + d[i + 1];
-		count += neighbor_row >= 0 && neighbor_row < height
-			&& neighbor_col >= 0 && neighbor_col < width
-			&& board[neighbor_row * width + neighbor_col] == 'O';
+
+	for (int r = row - 1; r <= row + 1; r++) {
+		for (int c = col - 1; c <= col + 1; c++) {
+			if (r == row && c == col)
+				continue;
+
+			if (r >= 0 && r < height && c >= 0 && c < width) {
+				if (board[r * width + c] == 'O') {
+					count++;
+				}
+			}
+		}
 	}
 	return count;
 }
@@ -76,11 +81,12 @@ int main(int argc, char **argv) {
 		next = temp;
 	}
 
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++)
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
 			putchar(board[y * width + x]);
+		}
 		putchar('\n');
-
+	}
 	free(board);
 	free(next);
 	return 0;
