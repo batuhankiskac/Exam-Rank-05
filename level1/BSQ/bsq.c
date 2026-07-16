@@ -28,6 +28,12 @@ static void free_map(char **arr) {
 	free(arr);
 }
 
+static int cleanup_fail(char *line, char **grid) {
+	free(line);
+	free_map(grid);
+	return -1;
+}
+
 static int load_elements(FILE *file, t_elements *e) {
 	if (fscanf(file, "%d %c %c %c", &e->n_lines, &e->empty, &e->obstacle, &e->full) != 4)
 		return -1;
@@ -47,33 +53,25 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 	char *line = NULL;
 	size_t len = 0;
 	if (getline(&line, &len, file) == -1) {
-		free(line);
-		free_map(map->grid);
-		return -1;
+		return cleanup_fail(line, map->grid);
 	}
 
 	for (int i = 0; i < map->height; i++) {
 		int r = getline(&line, &len, file);
 		if (r == -1 || line[r - 1] != '\n') {
-			free(line);
-			free_map(map->grid);
-			return -1;
+			return cleanup_fail(line, map->grid);
 		}
 		r--;
 
 		if (i == 0)
 			map->width = r;
 		else if (map->width != r) {
-			free(line);
-			free_map(map->grid);
-			return -1;
+			return cleanup_fail(line, map->grid);
 		}
 
 		map->grid[i] = malloc(r + 1);
 		if (!map->grid[i]) {
-			free(line);
-			free_map(map->grid);
-			return -1;
+			return cleanup_fail(line, map->grid);
 		}
 		int k;
 		for (k = 0; k < r; k++) {
@@ -83,9 +81,7 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 		}
 		if (k < r) {
 			map->grid[i][k] = '\0';
-			free(line);
-			free_map(map->grid);
-			return -1;
+			return cleanup_fail(line, map->grid);
 		}
 		map->grid[i][r] = '\0';
 	}
@@ -100,12 +96,16 @@ static void find_square(t_map *map, t_square *sq, t_elements *e) {
 		return;
 	for (int i = 0; i < map->height; i++)
 		for (int j = 0; j < w; j++) {
-			if (map->grid[i][j] == e->obstacle) m[i*w+j] = 0;
-			else if (i == 0 || j == 0) m[i*w+j] = 1;
+			if (map->grid[i][j] == e->obstacle)
+				m[i*w+j] = 0;
+			else if (i == 0 || j == 0)
+				m[i*w+j] = 1;
 			else {
 				int min = m[(i-1)*w+j];
-				if (m[(i-1)*w+(j-1)] < min) min = m[(i-1)*w+(j-1)];
-				if (m[i*w+(j-1)] < min) min = m[i*w+(j-1)];
+				if (m[(i-1)*w+(j-1)] < min)
+					min = m[(i-1)*w+(j-1)];
+				if (m[i*w+(j-1)] < min)
+					min = m[i*w+(j-1)];
 				m[i*w+j] = min + 1;
 			}
 			if (m[i*w+j] > sq->size) {
@@ -121,10 +121,8 @@ static void print_map(t_map *map, t_square *sq, t_elements *e) {
 	for (int i = sq->i; i < sq->i + sq->size; i++)
 		for (int j = sq->j; j < sq->j + sq->size; j++)
 			map->grid[i][j] = e->full;
-	for (int i = 0; i < map->height; i++) {
-		fputs(map->grid[i], stdout);
-		fputs("\n", stdout);
-	}
+	for (int i = 0; i < map->height; i++)
+		fprintf(stdout, "%s\n", map->grid[i]);
 }
 
 int execute_bsq(FILE *file) {
