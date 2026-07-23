@@ -16,11 +16,29 @@ static void free_map(t_map *map) {
 	for (int i = 0; i < map->height; i++)
 		free(map->grid[i]);
 	free(map->grid);
+	map->grid = NULL;
 }
 
 static int fail(t_map *map, char *line) {
 	free(line);
 	free_map(map);
+	return 1;
+}
+
+static int valid_symbols(t_map *map) {
+	return (map->height > 0
+		&& map->empty >= 32 && map->empty <= 126
+		&& map->obstacle >= 32 && map->obstacle <= 126
+		&& map->full >= 32 && map->full <= 126
+		&& map->empty != map->obstacle
+		&& map->empty != map->full
+		&& map->obstacle != map->full);
+}
+
+static int valid_row(char *line, int width, t_map *map) {
+	for (int i = 0; i < width; i++)
+		if (line[i] != map->empty && line[i] != map->obstacle)
+			return 0;
 	return 1;
 }
 
@@ -35,18 +53,9 @@ static int load_map(FILE *file, t_map *map) {
 	r = getline(&line, &cap, file);
 	if (r < 1 || line[r - 1] != '\n')
 		return fail(map, line);
-	for (int i = 0; i < r - 1; i++)
-		if (line[i] != ' ' && line[i] != '\t' && line[i] != '\r')
-			return fail(map, line);
 	free(line);
 	line = NULL;
-	cap = 0;
-	if (map->height <= 0
-		|| map->empty < 32 || map->empty > 126
-		|| map->obstacle < 32 || map->obstacle > 126
-		|| map->full < 32 || map->full > 126
-		|| map->empty == map->obstacle || map->empty == map->full
-		|| map->obstacle == map->full)
+	if (!valid_symbols(map))
 		return 1;
 	map->grid = calloc(map->height, sizeof(char *));
 	if (!map->grid)
@@ -60,13 +69,11 @@ static int load_map(FILE *file, t_map *map) {
 			map->width = r;
 		else if (r != map->width)
 			return fail(map, line);
-		for (int j = 0; j < r; j++)
-			if (line[j] != map->empty && line[j] != map->obstacle)
-				return fail(map, line);
+		if (!valid_row(line, r, map))
+			return fail(map, line);
 		line[r] = '\0';
 		map->grid[i] = line;
 		line = NULL;
-		cap = 0;
 	}
 	if (getline(&line, &cap, file) != -1)
 		return fail(map, line);
@@ -113,14 +120,12 @@ static int solve(t_map *map) {
 
 static int execute_bsq(FILE *file) {
 	t_map map = {0};
-	if (load_map(file, &map))
-		return 1;
-	if (solve(&map)) {
-		free_map(&map);
-		return 1;
-	}
+	int status = load_map(file, &map);
+
+	if (!status)
+		status = solve(&map);
 	free_map(&map);
-	return 0;
+	return status;
 }
 
 int main(int argc, char **argv) {
