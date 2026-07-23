@@ -97,21 +97,20 @@ static int find_square(t_map *map, t_square *sq, t_elements *e) {
 		return -1;
 	for (int i = 0; i < map->height; i++)
 		for (int j = 0; j < w; j++) {
-			int pos = i * w + j;
 			if (map->grid[i][j] == e->obstacle)
-				m[pos] = 0;
+				m[i * w + j] = 0;
 			else if (i == 0 || j == 0)
-				m[pos] = 1;
+				m[i * w + j] = 1;
 			else {
-				int min = m[pos - w];
-				if (m[pos - w - 1] < min)
-					min = m[pos - w - 1];
-				if (m[pos - 1] < min)
-					min = m[pos - 1];
-				m[pos] = min + 1;
+				int min = m[(i - 1) * w + j];
+				if (m[(i - 1) * w + (j - 1)] < min)
+					min = m[(i - 1) * w + (j - 1)];
+				if (m[i * w + (j - 1)] < min)
+					min = m[i * w + (j - 1)];
+				m[i * w + j] = min + 1;
 			}
-			if (m[pos] > sq->size) {
-				sq->size = m[pos];
+			if (m[i * w + j] > sq->size) {
+				sq->size = m[i * w + j];
 				sq->i = i - sq->size + 1;
 				sq->j = j - sq->size + 1;
 			}
