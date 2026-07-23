@@ -10,8 +10,6 @@ private:
 
 public:
 	vect2(int x = 0, int y = 0) : x(x), y(y) { }
-	vect2(const vect2& other) = default;
-	vect2& operator=(const vect2& other) = default;
 
 	int operator[](int i) const;
 	int& operator[](int i);
