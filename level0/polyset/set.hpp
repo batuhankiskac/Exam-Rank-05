@@ -4,7 +4,7 @@
 
 class set {
 private:
-	searchable_bag* bag;
+	searchable_bag& bag;
 public:
 	set(searchable_bag& s_bag);
 	bool has(int v) const;
