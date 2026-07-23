@@ -1,43 +1,26 @@
 #include "bigint.hpp"
 #include <algorithm>
-#include <cstdlib>
 
 bigint::bigint() : str("0") {}
 
-bigint::bigint(unsigned int num) {
-	str = std::to_string(num);
-}
-
-bigint::bigint(const bigint& src) : str(src.str) {}
-
-bigint& bigint::operator=(const bigint& src) {
-	str = src.str;
-	return *this;
-}
+bigint::bigint(unsigned int num) : str(std::to_string(num)) {}
 
 bigint bigint::operator+(const bigint& o) const {
-	std::string a = str, b = o.str;
-	std::reverse(a.begin(), a.end());
-	std::reverse(b.begin(), b.end());
-
-	if (a.size() < b.size())
-		a.append(b.size() - a.size(), '0');
-	if (b.size() < a.size())
-		b.append(a.size() - b.size(), '0');
-
 	std::string res;
+	int i = str.size() - 1;
+	int j = o.str.size() - 1;
 	int carry = 0;
-	for (size_t i = 0; i < a.size(); i++) {
-		int sum = (a[i] - '0') + (b[i] - '0') + carry;
+
+	while (i >= 0 || j >= 0 || carry) {
+		int sum = carry;
+		if (i >= 0)
+			sum += str[i--] - '0';
+		if (j >= 0)
+			sum += o.str[j--] - '0';
 		carry = sum / 10;
 		res.push_back((sum % 10) + '0');
 	}
-
-	if (carry)
-		res.push_back(carry + '0');
-
 	std::reverse(res.begin(), res.end());
-
 	bigint t;
 	t.str = res;
 	return t;
@@ -48,7 +31,7 @@ bigint& bigint::operator+=(const bigint& o) {
 }
 
 bigint& bigint::operator++() {
-	return *this = *this + bigint(1);
+	return *this += 1;
 }
 
 bigint bigint::operator++(int) {
@@ -83,11 +66,15 @@ bigint& bigint::operator>>=(unsigned int n) {
 }
 
 bigint bigint::operator<<(const bigint& o) const {
-	return *this << (unsigned)strtoul(o.str.c_str(), NULL, 10);
+	if (str == "0")
+		return *this;
+	return *this << o.to_uint();
 }
 
 bigint bigint::operator>>(const bigint& o) const {
-	return *this >> (unsigned)strtoul(o.str.c_str(), NULL, 10);
+	if (o >= bigint(str.size()))
+		return bigint();
+	return *this >> o.to_uint();
 }
 
 bigint& bigint::operator<<=(const bigint& o) {
@@ -96,6 +83,13 @@ bigint& bigint::operator<<=(const bigint& o) {
 
 bigint& bigint::operator>>=(const bigint& o) {
 	return *this = *this >> o;
+}
+
+unsigned int bigint::to_uint() const {
+	unsigned int n = 0;
+	for (size_t i = 0; i < str.size(); i++)
+		n = n * 10 + str[i] - '0';
+	return n;
 }
 
 bool bigint::operator==(const bigint& o) const {

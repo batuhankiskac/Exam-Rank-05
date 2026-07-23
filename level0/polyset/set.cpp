@@ -1,14 +1,14 @@
 #include "set.hpp"
 
-set::set(searchable_bag& s_bag) : bag(s_bag) {}
+set::set(searchable_bag& s_bag) : bag(&s_bag) {}
 
 bool set::has(int v) const {
-	return bag.has(v);
+	return bag->has(v);
 }
 
 void set::insert(int v) {
 	if (!has(v))
-		bag.insert(v);
+		bag->insert(v);
 }
 
 void set::insert(int* data, int size) {
@@ -17,15 +17,13 @@ void set::insert(int* data, int size) {
 }
 
 void set::print() const {
-	bag.print();
+	bag->print();
 }
 
 void set::clear() {
-	bag.clear();
+	bag->clear();
 }
 
 const searchable_bag& set::get_bag() const {
-	return bag;
+	return *bag;
 }
-
-set::~set() {}
