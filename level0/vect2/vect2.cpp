@@ -1,78 +1,84 @@
 #include "vect2.hpp"
 
 int vect2::operator[](int i) const {
-	return i == 0 ? x : y;
+	return (i == 0) ? x : y;
 }
 
 int& vect2::operator[](int i) {
-	return i == 0 ? x : y;
+	return (i == 0) ? x : y;
+}
+
+vect2 vect2::operator+(const vect2& other) const {
+	return vect2(x + other.x, y + other.y);
+}
+
+vect2 vect2::operator-(const vect2& other) const {
+	return vect2(x - other.x, y - other.y);
 }
 
 vect2 vect2::operator-() const {
 	return vect2(-x, -y);
 }
 
-vect2& vect2::operator*=(int n) {
-	x *= n;
-	y *= n;
+vect2 vect2::operator*(int scalar) const {
+	return vect2(x * scalar, y * scalar);
+}
+
+vect2& vect2::operator+=(const vect2& other) {
+	x += other.x;
+	y += other.y;
 	return *this;
 }
 
-vect2& vect2::operator+=(const vect2& o) {
-	x += o.x;
-	y += o.y;
+vect2& vect2::operator-=(const vect2& other) {
+	x -= other.x;
+	y -= other.y;
 	return *this;
 }
 
-vect2& vect2::operator-=(const vect2& o) {
-	return *this += -o;
-}
-
-vect2 vect2::operator*(int n) const {
-	return vect2(x * n, y * n);
-}
-
-vect2 vect2::operator+(const vect2& o) const {
-	return vect2(x + o.x, y + o.y);
-}
-
-vect2 vect2::operator-(const vect2& o) const {
-	return vect2(x - o.x, y - o.y);
+vect2& vect2::operator*=(int scalar) {
+	x *= scalar;
+	y *= scalar;
+	return *this;
 }
 
 vect2& vect2::operator++() {
-	return *this += vect2(1, 1);
+	++x;
+	++y;
+	return *this;
 }
 
 vect2 vect2::operator++(int) {
-	vect2 tmp(*this);
+	vect2 temp(*this);
 	++(*this);
-	return tmp;
+	return temp;
 }
 
 vect2& vect2::operator--() {
-	return *this -= vect2(1, 1);
+	--x;
+	--y;
+	return *this;
 }
 
 vect2 vect2::operator--(int) {
-	vect2 tmp(*this);
+	vect2 temp(*this);
 	--(*this);
-	return tmp;
+	return temp;
 }
 
-bool vect2::operator==(const vect2& o) const {
-	return x == o.x && y == o.y;
+bool vect2::operator==(const vect2& other) const {
+	return (x == other.x && y == other.y);
 }
 
-bool vect2::operator!=(const vect2& o) const {
-	return !(*this == o);
+bool vect2::operator!=(const vect2& other) const {
+	return !(*this == other);
 }
 
-vect2 operator*(int n, const vect2& o) {
-	return o * n;
+vect2 operator*(int scalar, const vect2& v) {
+	return v * scalar;
 }
 
-std::ostream& operator<<(std::ostream& os, const vect2& o) {
-	os << "{" << o[0] << ", " << o[1] << "}";
+std::ostream& operator<<(std::ostream& os, const vect2& v) {
+	os << "{" << v[0] << ", " << v[1] << "}";
 	return os;
 }
