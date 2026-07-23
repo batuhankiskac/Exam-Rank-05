@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 
 	for (int r = 0; r < height; r++) {
 		for (int c = 0; c < width; c++)
-			putchar(board[r * width + c] ? 'O' : '.');
+			putchar(board[r * width + c] ? 'O' : ' ');
 		putchar('\n');
 	}
 	free(board);
