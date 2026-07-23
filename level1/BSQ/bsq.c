@@ -21,7 +21,7 @@ static void free_map(t_map *map) {
 static int fail(t_map *map, char *line) {
 	free(line);
 	free_map(map);
-	return 0;
+	return 1;
 }
 
 static int load_map(FILE *file, t_map *map) {
@@ -31,7 +31,7 @@ static int load_map(FILE *file, t_map *map) {
 
 	if (fscanf(file, "%d %c %c %c", &map->height,
 			&map->empty, &map->obstacle, &map->full) != 4)
-		return 0;
+		return 1;
 	r = getline(&line, &cap, file);
 	if (r < 1 || line[r - 1] != '\n')
 		return fail(map, line);
@@ -47,10 +47,10 @@ static int load_map(FILE *file, t_map *map) {
 		|| map->full < 32 || map->full > 126
 		|| map->empty == map->obstacle || map->empty == map->full
 		|| map->obstacle == map->full)
-		return 0;
+		return 1;
 	map->grid = calloc(map->height, sizeof(char *));
 	if (!map->grid)
-		return 0;
+		return 1;
 	for (int i = 0; i < map->height; i++) {
 		r = getline(&line, &cap, file);
 		if (r <= 1 || line[r - 1] != '\n')
@@ -71,7 +71,7 @@ static int load_map(FILE *file, t_map *map) {
 	if (getline(&line, &cap, file) != -1)
 		return fail(map, line);
 	free(line);
-	return 1;
+	return 0;
 }
 
 static int solve(t_map *map) {
@@ -81,7 +81,7 @@ static int solve(t_map *map) {
 	int best_j = 0;
 
 	if (!dp)
-		return 0;
+		return 1;
 	for (int i = 0; i < map->height; i++) {
 		int diagonal = 0;
 		for (int j = 1; j <= map->width; j++) {
@@ -108,30 +108,30 @@ static int solve(t_map *map) {
 			map->grid[i][j] = map->full;
 	for (int i = 0; i < map->height; i++)
 		fprintf(stdout, "%s\n", map->grid[i]);
-	return 1;
+	return 0;
 }
 
 static int execute_bsq(FILE *file) {
 	t_map map = {0};
-	if (!load_map(file, &map))
-		return 0;
-	if (!solve(&map)) {
+	if (load_map(file, &map))
+		return 1;
+	if (solve(&map)) {
 		free_map(&map);
-		return 0;
+		return 1;
 	}
 	free_map(&map);
-	return 1;
+	return 0;
 }
 
 int main(int argc, char **argv) {
 	if (argc == 1) {
-		if (!execute_bsq(stdin))
+		if (execute_bsq(stdin))
 			fprintf(stderr, "map error\n");
 		return 0;
 	}
 	for (int i = 1; i < argc; i++) {
 		FILE *file = fopen(argv[i], "r");
-		if (!file || !execute_bsq(file))
+		if (!file || execute_bsq(file))
 			fprintf(stderr, "map error\n");
 		if (file)
 			fclose(file);
