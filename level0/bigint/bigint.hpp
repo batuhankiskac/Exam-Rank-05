@@ -1,44 +1,37 @@
-#ifndef BIGINT_HPP
-#define BIGINT_HPP
+#pragma once
 
-#include <string>
 #include <iostream>
+#include <string>
+#include <algorithm>
 
-class bigint
-{
+class bigint {
 private:
 	std::string str;
 	unsigned int to_uint() const;
-
 public:
 	bigint();
 	bigint(unsigned int num);
-	bigint(const bigint& src) = default;
-	bigint& operator=(const bigint& src) = default;
 
-	bigint operator+(const bigint& o) const;
-	bigint& operator+=(const bigint& o);
+	bigint operator+(const bigint& other) const;
+	bigint& operator+=(const bigint& other);
 	bigint& operator++();
 	bigint operator++(int);
 
-	bigint operator<<(unsigned int n) const;
-	bigint operator>>(unsigned int n) const;
-	bigint& operator<<=(unsigned int n);
-	bigint& operator>>=(unsigned int n);
+	bigint operator<<(unsigned int num) const;
+	bigint operator>>(unsigned int num) const;
+	bigint& operator<<=(unsigned int num);
+	bigint& operator>>=(unsigned int num);
 
-	bigint operator<<(const bigint& o) const;
-	bigint operator>>(const bigint& o) const;
-	bigint& operator<<=(const bigint& o);
-	bigint& operator>>=(const bigint& o);
+	bigint operator<<(const bigint& other) const;
+	bigint operator>>(const bigint& other) const;
+	bigint& operator<<=(const bigint& other);
+	bigint& operator>>=(const bigint& other);
 
-	bool operator==(const bigint& o) const;
-	bool operator<(const bigint& o) const;
-	bool operator!=(const bigint& o) const;
-	bool operator>(const bigint& o) const;
-	bool operator<=(const bigint& o) const;
-	bool operator>=(const bigint& o) const;
-
+	bool operator==(const bigint& other) const;
+	bool operator!=(const bigint& other) const;
+	bool operator<(const bigint& other) const;
+	bool operator>(const bigint& other) const;
+	bool operator<=(const bigint& other) const;
+	bool operator>=(const bigint& other) const;
 	friend std::ostream& operator<<(std::ostream& os, const bigint& b);
 };
-
-#endif
