@@ -61,6 +61,9 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 	int r = getline(&line, &len, file);
 	if (r < 1 || line[r - 1] != '\n')
 		return cleanup_fail(line, map->grid);
+	free(line);
+	line = NULL;
+	len = 0;
 
 	for (int i = 0; i < map->height; i++) {
 		r = getline(&line, &len, file);
@@ -73,20 +76,13 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 		else if (map->width != r)
 			return cleanup_fail(line, map->grid);
 
-		map->grid[i] = malloc(r + 1);
-		if (!map->grid[i])
-			return cleanup_fail(line, map->grid);
-		int k;
-		for (k = 0; k < r; k++) {
+		for (int k = 0; k < r; k++)
 			if (line[k] != e->empty && line[k] != e->obstacle)
-				break;
-			map->grid[i][k] = line[k];
-		}
-		if (k < r) {
-			map->grid[i][k] = '\0';
-			return cleanup_fail(line, map->grid);
-		}
-		map->grid[i][r] = '\0';
+				return cleanup_fail(line, map->grid);
+		line[r] = '\0';
+		map->grid[i] = line;
+		line = NULL;
+		len = 0;
 	}
 	if (getline(&line, &len, file) != -1)
 		return cleanup_fail(line, map->grid);
@@ -101,22 +97,23 @@ static int find_square(t_map *map, t_square *sq, t_elements *e) {
 		return -1;
 	for (int i = 0; i < map->height; i++)
 		for (int j = 0; j < w; j++) {
+			int pos = i * w + j;
 			if (map->grid[i][j] == e->obstacle)
-				m[i*w+j] = 0;
+				m[pos] = 0;
 			else if (i == 0 || j == 0)
-				m[i*w+j] = 1;
+				m[pos] = 1;
 			else {
-				int min = m[(i-1)*w+j];
-				if (m[(i-1)*w+(j-1)] < min)
-					min = m[(i-1)*w+(j-1)];
-				if (m[i*w+(j-1)] < min)
-					min = m[i*w+(j-1)];
-				m[i*w+j] = min + 1;
+				int min = m[pos - w];
+				if (m[pos - w - 1] < min)
+					min = m[pos - w - 1];
+				if (m[pos - 1] < min)
+					min = m[pos - 1];
+				m[pos] = min + 1;
 			}
-			if (m[i*w+j] > sq->size) {
-				sq->size = m[i*w+j];
-				sq->i = i - m[i*w+j] + 1;
-				sq->j = j - m[i*w+j] + 1;
+			if (m[pos] > sq->size) {
+				sq->size = m[pos];
+				sq->i = i - sq->size + 1;
+				sq->j = j - sq->size + 1;
 			}
 		}
 	free(m);
