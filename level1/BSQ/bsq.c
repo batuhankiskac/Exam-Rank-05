@@ -28,12 +28,6 @@ static void free_map(char **arr) {
 	free(arr);
 }
 
-static int cleanup_fail(char *line, char **grid) {
-	free(line);
-	free_map(grid);
-	return 1;
-}
-
 static int load_elements(FILE *file, t_elements *e) {
 	if (fscanf(file, "%d %c %c %c", &e->num_lines,
 			&e->empty, &e->obstacle, &e->full) != 4)
@@ -60,34 +54,48 @@ static int load_map(FILE *file, t_map *map, t_elements *e) {
 	size_t len = 0;
 
 	int r = getline(&line, &len, file);
-	if (r == -1 || line[r - 1] == '\n')
-		return cleanup_fail(line, map->grid);
+	if (r != 1 || line[0] != '\n') {
+		free(line);
+		return 1;
+	}
 	free(line);
 	line = NULL;
 	len = 0;
 
 	for (int i = 0; i < map->height; i++) {
 		r = getline(&line, &len, file);
-		if (r == -1 || line[r - 1] != '\n')
-			return cleanup_fail(line, map->grid);
+		if (r == -1 || line[r - 1] != '\n') {
+			free(line);
+			return 1;
+		}
 		r--;
 
-		if (i == 0)
+		if (i == 0) {
+			if (r == 0) {
+				free(line);
+				return 1;
+			}
 			map->width = r;
-		else if (r != map->width)
-			return cleanup_fail(line, map->grid);
+		} else if (r != map->width) {
+			free(line);
+			return 1;
+		}
 
 		for (int k = 0; k < r; k++) {
-			if (line[k] != e->empty && line[k] != e->obstacle)
-				return cleanup_fail(line, map->grid);
+			if (line[k] != e->empty && line[k] != e->obstacle) {
+				free(line);
+				return 1;
+			}
 		}
 		line[r] = '\0';
 		map->grid[i] = line;
 		line = NULL;
 		len = 0;
 	}
-	if (getline(&line, &len, file) != -1)
-		return cleanup_fail(line, map->grid);
+	if (getline(&line, &len, file) != -1) {
+		free(line);
+		return 1;
+	}
 	free(line);
 	return 0;
 }
@@ -124,9 +132,11 @@ static int find_square(t_map *map, t_elements *e, t_square *sq) {
 }
 
 static void print_map(t_map *map, t_elements *e, t_square *sq) {
-	for (int i = sq->i; i <= sq->i; i++) {
-		for (int j = sq->j; j <= sq->j; j++) {
-			map->grid[i][j] = e->full;
+	if (sq->size > 0) {
+		for (int i = sq->i - sq->size + 1; i <= sq->i; i++) {
+			for (int j = sq->j - sq->size + 1; j <= sq->j; j++) {
+				map->grid[i][j] = e->full;
+			}
 		}
 	}
 	for (int i = 0; i < map->height; i++)
